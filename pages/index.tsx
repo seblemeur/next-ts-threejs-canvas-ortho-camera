@@ -13,10 +13,13 @@ const Home: NextPage = () => {
       return;
     }
 
+    // setup
     const scene = new THREE.Scene();
     const renderer = new THREE.WebGLRenderer({
       canvas: canvasRef.current,
     });
+
+    // image
     const geometry = new THREE.PlaneGeometry(1, 1);
     const material = new THREE.MeshBasicMaterial({ map: texture });
     const mesh = new THREE.Mesh(geometry, material);
@@ -34,17 +37,27 @@ const Home: NextPage = () => {
       height,
     };
 
-    const camera = new THREE.PerspectiveCamera(
-      75,
-      sizes.width / sizes.height,
-      0.1,
-      10000
+    // camera
+    const left = -width / 2;
+    const right = width / 2;
+    const top = height / 2;
+    const bottom = -height / 2;
+    const near = 0.1;
+    const far = 1000;
+    const camera = new THREE.OrthographicCamera(
+      left,
+      right,
+      top,
+      bottom,
+      near,
+      far
     );
-    camera.position.z = 300;
-    scene.add(camera);
 
+    camera.position.z = 1;
+
+    // render
+    scene.add(camera);
     renderer.setSize(sizes.width, sizes.height);
-    camera.aspect = width / height;
     camera.updateProjectionMatrix();
     renderer.render(scene, camera);
   }, [texture]);
