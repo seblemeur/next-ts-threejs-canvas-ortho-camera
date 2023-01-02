@@ -5,52 +5,54 @@ import styles from '../styles/Home.module.css';
 import * as THREE from 'three';
 
 const Home: NextPage = () => {
-  const canvas = useRef<HTMLElement>();
-  const { texture } = useUploadTexture('assets/musk.png');
+  const canvasRef = useRef<HTMLElement>();
+  const { texture } = useUploadTexture('musk.png');
 
   useEffect(() => {
-    if (!texture) {
+    if (!canvasRef || !texture) {
       return;
     }
-    console.log('call');
 
     const scene = new THREE.Scene();
     const renderer = new THREE.WebGLRenderer({
-      canvas: canvas.current,
+      canvas: canvasRef.current,
     });
-    const material = new THREE.MeshBasicMaterial({ map: texture });
     const geometry = new THREE.PlaneGeometry(1, 1);
+    const material = new THREE.MeshBasicMaterial({ map: texture });
     const mesh = new THREE.Mesh(geometry, material);
     mesh.scale.x = texture.image.width;
     mesh.scale.y = texture.image.height;
-
     scene.add(mesh);
 
-    const aspectRatio = texture.image.width / texture.image.height;
-    const camera = new THREE.OrthographicCamera(
-      -1 * aspectRatio,
-      1 * aspectRatio,
-      1,
-      -1,
+    // Calculate the width and height of the bounding box
+    const boundingBox = new THREE.Box3().setFromObject(mesh);
+    const width = boundingBox.max.x - boundingBox.min.x;
+    const height = boundingBox.max.y - boundingBox.min.y;
+
+    const sizes = {
+      width,
+      height,
+    };
+
+    const camera = new THREE.PerspectiveCamera(
+      75,
+      sizes.width / sizes.height,
       0.1,
-      100
+      10000
     );
+    camera.position.z = 300;
+    scene.add(camera);
 
-    //@ts-ignore
-    canvas.width = mesh.offsetWidth;
-    //@ts-ignore
-    canvas.height = mesh.offsetHeight;
-    //@ts-ignore
-    camera.aspect = canvas.width / canvas.height;
+    renderer.setSize(sizes.width, sizes.height);
+    camera.aspect = width / height;
     camera.updateProjectionMatrix();
-
     renderer.render(scene, camera);
   }, [texture]);
 
   return (
     <div className={styles.container}>
       <h1>Canvas with orthographic camera</h1>
-      <canvas className={styles.dessin} ref={canvas} />
+      <canvas className={styles.dessin} ref={canvasRef} />
     </div>
   );
 };
