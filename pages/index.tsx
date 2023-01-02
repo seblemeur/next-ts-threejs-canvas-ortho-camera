@@ -32,18 +32,19 @@ const Home: NextPage = () => {
     const width = boundingBox.max.x - boundingBox.min.x;
     const height = boundingBox.max.y - boundingBox.min.y;
 
-    const sizes = {
-      width,
-      height,
+    const margin = 300;
+    let cameraSizes = {
+      width: +width + +margin,
+      height: +height + +margin,
     };
 
     // camera
-    const left = -width / 2;
-    const right = width / 2;
-    const top = height / 2;
-    const bottom = -height / 2;
+    const left = -(cameraSizes.width / 2);
+    const right = cameraSizes.width / 2;
+    const top = cameraSizes.height / 2;
+    const bottom = -(cameraSizes.height / 2);
     const near = 0.1;
-    const far = 1000;
+    const far = 2;
     const camera = new THREE.OrthographicCamera(
       left,
       right,
@@ -52,13 +53,14 @@ const Home: NextPage = () => {
       near,
       far
     );
-
     camera.position.z = 1;
 
     // render
     scene.add(camera);
-    renderer.setSize(sizes.width, sizes.height);
+    scene.background = new THREE.Color('purple');
+    renderer.setSize(cameraSizes.width, cameraSizes.height);
     camera.updateProjectionMatrix();
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.render(scene, camera);
   }, [texture]);
 
